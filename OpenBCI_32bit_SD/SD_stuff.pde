@@ -150,16 +150,26 @@ void writeDataToSDcard(byte sampleNumber){
   // convert 24 bit channelData into HEX
   for (int currentChannel = 0; currentChannel < 8; currentChannel++){
     convertToHex(OBCI.channelDataInt[currentChannel], 5, addComma);
-    if(currentChannel == 6 && !addAccel) addComma = false;  // format CSV
+    if(currentChannel == 6 && !addAccelToSD ){
+      if(!addAuxToSD){
+        addComma = false;  // format CSV
+      }
+    }  
   }
       
-  if(addAccel == true){  // if we have accelerometer data to log
+  if(addAuxToSD == true){    // add the aux bytes to the data stream
+    for (int i = 0; i < 3; i++){
+      convertToHex(OBCI.auxData[i], 3, addComma);
+      if(i == 1) addComma = false;
+    }
+    addAuxToSD = false;
+  }else if(addAccelToSD == true){  // if we have accelerometer data to log
     // convert 16 bit accelerometer data into HEX
     for (int currentChannel = 0; currentChannel < 3; currentChannel++){
       convertToHex(OBCI.axisData[currentChannel], 3, addComma);
       if(currentChannel == 1) addComma = false;
     }
-    addAccel = false;  // disallow aux data logging 
+    addAccelToSD = false;  // disallow aux data logging 
   }// end of accelerometer data log
    // add aux data logging...   
 }

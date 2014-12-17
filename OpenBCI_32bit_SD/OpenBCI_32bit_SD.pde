@@ -11,7 +11,7 @@
  *
  * Made by Joel Murphy, Luke Travis, Conor Russomanno Summer, 2014. 
  * We're using the DSPI library, but our MISO and MOSI pins are not default
- * Adjust file Mpide_new.app/Contents/Resources/Java/hardware/pic32/variants/DP32/Board_Defs.h
+ * Adjust file mpide.app/Contents/Resources/Java/hardware/pic32/variants/DP32/Board_Defs.h
  * Change the SPI1 defines thusly:
  *      #define _DSPI0_MISO_IN    PPS_IN_SDI1
  *      #define _DSPI0_MISO_PIN   5 // [Changed for OpenBCI was 10] RA1  SDI1 SDI1R = RPA1 = 0 
@@ -67,8 +67,7 @@ int outputType;
 //------------------------------------------------------------------------------
 //  << LIS3DH Accelerometer Business >>
 //  LIS3DH_SS on pin 5 defined in OpenBCI library
-volatile boolean auxAvailable = false;
-volatile boolean addAccel = true;
+volatile boolean addAccelToSD;
 boolean useAccelOnly = false;
 //------------------------------------------------------------------------------
 //  << PUT FILTER STUFF HERE >>
@@ -78,12 +77,20 @@ boolean useFilters = false;
 int LED = 11;  // blue LED alias
 int PGCpin = 12;  // PGC pin goes high when PIC is in bootloader mode
 //------------------------------------------------------------------------------
+//  << EXTERNAL TRIGGER FROM PROG PUSHBUTTON >>
+int pushButton = 17;		// the button is on pin D17
+int pushButtonValue;		// used to hold the latest button reading
+int lastPushButtonValue;	// used to remember the last button state
+boolean addAuxToSD;             // option to add the aux data to the SD card 
+//------------------------------------------------------------------------------
 
 void setup(void) {
 
   Serial0.begin(115200);  // using hardware uart number 0
   pinMode(LED, OUTPUT); digitalWrite(LED,HIGH);    // blue LED
   pinMode(PGCpin,OUTPUT); digitalWrite(PGCpin,LOW);// used to tell RFduino if we are in bootloader mode
+  pinMode(pushButton, INPUT);		// set the button pin direction
+  pushButtonValue = lastPushButtonValue = digitalRead(pushButton); // seed
   
   startFromScratch();
 }
@@ -97,13 +104,25 @@ void loop() {
       while(!(OBCI.isDataAvailable())){}   // wait for DRDY pin...
       
       OBCI.updateChannelData(); // get the fresh ADS results
+      
+      pushButtonValue = digitalRead(pushButton);    // feel the PROG button
+      if (pushButtonValue != lastPushButtonValue){  // if it's changed,
+        if (pushButtonValue == HIGH){    // if it's gone from LOW to HIGH
+	  OBCI.auxData[0] = 0xFFFF;	 // take note (this could be a counter, or...)
+	  OBCI.useAux = true;	         // set the OBCI.auxData flag
+          addAuxToSD = true;             // add Aux Data to the SD card if it's there
+	}
+	lastPushButtonValue = pushButtonValue; // keep track of the changes
+      }
+      
       if(OBCI.useAccel && OBCI.LIS3DH_DataAvailable()){
         OBCI.LIS3DH_updateAxisData();    // fresh axis data goes into the X Y Z 
-        addAccel = true;
+        addAccelToSD = true;    // adds accel data to SD card if you like that kind of thing
       }
       if(SDfileOpen){
         writeDataToSDcard(sampleCounter);  // 
       }
+      
       OBCI.sendChannelData(sampleCounter);
       sampleCounter++;
   }
@@ -466,8 +485,8 @@ void printRegisters(){
 void startFromScratch(){
    delay(1000);
   Serial0.print("OpenBCI V3 32bit Board\nSetting ADS1299 Channel Values\n");
-  OBCI.useAccel = true;  // option to add accelerometer dat to stream
-  OBCI.useAux = false;    // option to add user data to stream not implimented yet
+  OBCI.useAccel = false;  // option to add accelerometer data to stream
+  OBCI.useAux = false;   // flag to add user data to stream 
   OBCI.initialize();  
   OBCI.configureLeadOffDetection(LOFF_MAG_6NA, LOFF_FREQ_31p2HZ);  
   Serial0.print("ADS1299 Device ID: 0x"); Serial0.println(OBCI.ADS_getDeviceID(),HEX);
