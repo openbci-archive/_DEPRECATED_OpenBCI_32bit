@@ -1,7 +1,9 @@
 OpenBCI_32bit
 =============
 
-Repository containing the firmware for the 32bit OpenBCI board.
+This branch implements the PROG button as an external trigger source.
+
+>>>>>>  YOU MUST ALSO USE THE OpenBCI_32 LIBRARY UPDATED IN THIS BRANCH  <<<<<<<<<
 
 Note that to USE the OpenBCI system, you will generally use the OpenBCI USB Dongle. The dongle requries that you install the FTDI drivers for your particular operating system: http://www.ftdichip.com/FTDrivers.htm
 
