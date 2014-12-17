@@ -1,7 +1,7 @@
 /*
  * 
  *  >>>> THIS CODE USED TO STREAM OpenBCI V3_32 DATA TO DONGLE <<<<
- *  >>>> May include the 60Hz notch filter by Chip Audette  <<<<
+ *  >>>> Implements External Trigger from PROG Push Button  <<<<
  *
  * This code is written to target a PIC32MX250F128B with UDB32-MX2-DIP bootloader
  * To Program, user must manually reset the PIC32 on the OpenBCI 32bit Board
