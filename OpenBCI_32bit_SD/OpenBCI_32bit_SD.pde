@@ -485,7 +485,7 @@ void printRegisters(){
 void startFromScratch(){
    delay(1000);
   Serial0.print("OpenBCI V3 32bit Board\nSetting ADS1299 Channel Values\n");
-  OBCI.useAccel = false;  // option to add accelerometer data to stream
+  OBCI.useAccel = true;  // option to add accelerometer data to stream
   OBCI.useAux = false;   // flag to add user data to stream 
   OBCI.initialize();  
   OBCI.configureLeadOffDetection(LOFF_MAG_6NA, LOFF_FREQ_31p2HZ);  
