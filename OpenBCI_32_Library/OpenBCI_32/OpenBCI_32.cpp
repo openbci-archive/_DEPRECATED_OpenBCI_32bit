@@ -31,7 +31,12 @@ void OpenBCI_32::startStreaming(){
 void OpenBCI_32::sendChannelData(byte sampleNumber){
   Serial0.write(sampleNumber); // 1 byte
   ADS_writeChannelData();      // 24 bytes
-  LIS3DH_writeAxisData();      // 6 bytes
+  if(useAux){ 
+    writeAuxData();            // 3 16bit shorts
+    useAux = false;
+  }else{ 
+    LIS3DH_writeAxisData();    // 3 16bit shorts
+  }
 }
 
 void OpenBCI_32::stopStreaming(){
@@ -78,6 +83,14 @@ void OpenBCI_32::csHigh(int SS)
       break;
   }
   spi.setMode(DSPI_MODE0);  // DEFAULT TO SD MODE!
+}
+
+void OpenBCI_32::writeAuxData(){
+  for(int i=0; i<3; i++){
+    Serial0.write(highByte(auxData[i])); // write 16 bit axis data MSB first
+    Serial0.write(lowByte(auxData[i]));  // axisData is array of type short (16bit)
+    auxData[i] = 0;   // reset auxData bytes to 0
+  }
 }
 
 // <<<<<<<<<<<<<<<<<<<<<<<<<  END OF BOARD WIDE FUNCTIONS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -751,6 +764,7 @@ void OpenBCI_32::LIS3DH_writeAxisData(void){
   for(int i=0; i<3; i++){
     Serial0.write(highByte(axisData[i])); // write 16 bit axis data MSB first
     Serial0.write(lowByte(axisData[i]));  // axisData is array of type short (16bit)
+    axisData[i] = 0;  // reset the axis data variables to 0
   }
 }
 

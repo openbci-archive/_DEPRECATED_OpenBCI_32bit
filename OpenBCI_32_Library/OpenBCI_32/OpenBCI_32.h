@@ -22,6 +22,7 @@ public:
     void sendChannelData(byte); // send the current data with sample number
     void startStreaming(void);  // ADD DAISY USE outputType
     void stopStreaming(void);   // ADD DAISY USE outputType
+    void writeAuxData(void);
 
 // ADS1299  
     void initialize_ads(void);
@@ -74,6 +75,7 @@ public:
     boolean useSRB1;             // used to keep track of if we are using SRB1
     boolean useSRB2[8];          // used to remember if we were included in SRB2 before channel power down
     char leadOffSettings[8][2];  // used to control on/off of impedance measure for P and N side of each channel
+    short auxData[3];
 
 // LIS3DH
     short axisData[3];
