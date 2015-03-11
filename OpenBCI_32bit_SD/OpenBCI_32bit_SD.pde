@@ -10,14 +10,23 @@
  *
  *
  * Made by Joel Murphy, Luke Travis, Conor Russomanno Summer, 2014. 
- * We're using the DSPI library, but our MISO and MOSI pins are not default
- * Adjust file mpide.app/Contents/Resources/Java/hardware/pic32/variants/DP32/Board_Defs.h
- * Change the SPI1 defines thusly:
- *      #define _DSPI0_MISO_IN    PPS_IN_SDI1
- *      #define _DSPI0_MISO_PIN   5 // [Changed for OpenBCI was 10] RA1  SDI1 SDI1R = RPA1 = 0 
- *      #define _DSPI0_MOSI_OUT   PPS_OUT_SDO1
- *      #define _DSPI0_MOSI_PIN   10  // [Changed for OpenBCI was 18] RA4  SDO1 RPA4R = SDO1 = 3
- * Until chipKIT or Diligent allows user selection of MOSI/MISO
+ * Before you upload the firmware, you need to place the OpenBCI board variant files inside the mpide program folder:
+ * This will allow you to find the OpenBCI 32 board in mpide dropdown selection tree!
+ * Place the OpenBCI folder into the mpide application:
+ *
+ * On A Mac, right click the application mpide, and select 'Show Package Contents' 
+ * place the entire OpenBCI folder in the variants folder here:
+ * Mpide/Contents/Resources/Java/hardware/pic32/variants
+ *
+ * On a Windows, place the entire OpenBCI folder in the variants folder here:
+ * C:\Program Files\mpide-blah\hardware\pic32\variants
+ *
+ * Move the files OpenBCI_32 and SD from the OpenBCI_32_Library folder and put it in your documents/mpide/libraries folder.
+ * Put the OpenBCI_32_SD into your documents/mpide folder and restart mpide to be able to select the sketch.
+ *
+ * When you upload the firmware, select the 'OpenBCI 32' from the Tools -> Board -> chipKIT menu, 
+ * select the serial port of the dongle, then press upload!
+ *
  *
  * Any SDcard code is based on RawWrite example in SDFat library 
  * ASCII commands are received on the serial port to configure and control
