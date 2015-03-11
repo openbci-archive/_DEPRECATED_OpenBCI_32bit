@@ -23,8 +23,8 @@ Place the OpenBCI folder into the mpide application:
 
     On a Windows, place the entire OpenBCI folder in the variants folder here:
     C:\Program Files\mpide-blah\hardware\pic32\variants
-    Remove the files OpenBCI_32 and SD from the OpenBCI_32_Library folder and put it in your
-    documents\mpide\libraries folder.
+
+Remove the files OpenBCI_32 and SD from the OpenBCI_32_Library folder and put it in your documents\mpide\libraries folder.
 
 Put the OpenBCI_32_SD into your documents/mpide folder and restart mpide to be able to select the sketch.
 
