@@ -362,6 +362,7 @@ void OpenBCI_32::deactivateChannel(int N)
   N = constrain(N-1,0,7);  //subtracts 1 so that we're counting from 0, not 1
 //  reg = CH1SET+(byte)N;           // select the current channel
   setting = RREG(CH1SET+(byte)N); delay(1); // get the current channel settings
+  channelSettings[N][POWER_DOWN] = NO;    // added to overcome channel settings bug JM
   bitSet(setting,7);              // set bit7 to shut down channel
 //  if (channelSettings[N][SRB2_SET] == YES)
   bitClear(setting,3);    // clear bit3 to disclude from SRB2 if used
@@ -391,6 +392,7 @@ void OpenBCI_32::activateChannel(int N)
   //proceed...first, disable any data collection
   SDATAC(); delay(1);      // exit Read Data Continuous mode to communicate with ADS
     setting = 0x00;
+    channelSettings[N][POWER_DOWN] = YES; // keep track of channel on/off in this array
     setting |= channelSettings[N][GAIN_SET]; // gain
     setting |= channelSettings[N][INPUT_TYPE_SET]; // input code
     if(useSRB2[N] == true){channelSettings[N][SRB2_SET] = YES;}else{channelSettings[N][SRB2_SET] = NO;}

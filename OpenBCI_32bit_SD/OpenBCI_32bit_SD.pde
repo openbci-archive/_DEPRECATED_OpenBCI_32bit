@@ -10,32 +10,44 @@
  *
  *
  * Made by Joel Murphy, Luke Travis, Conor Russomanno Summer, 2014. 
+ * Note that to USE the OpenBCI system, you will generally use the OpenBCI USB Dongle.
+ *The dongle requries that you install the FTDI drivers for your particular operating system: 
+ * http://www.ftdichip.com/FTDrivers.htm
+
  * Before you upload the firmware, you need to place the OpenBCI board variant files inside the mpide program folder:
+
  * This will allow you to find the OpenBCI 32 board in mpide dropdown selection tree!
  * Place the OpenBCI folder into the mpide application:
+
+ *     On A Mac, right click the application mpide, and select 'Show Package Contents' 
+ *     place the entire OpenBCI folder in the variants folder here:
+ *     Mpide/Contents/Resources/Java/hardware/pic32/variants
+
+
+ *     On a Windows, place the entire OpenBCI folder in the variants folder here:
+ *     C:\Program Files\mpide-blah\hardware\pic32\variants
+ *     Remove the files OpenBCI_32 and SD from the OpenBCI_32_Library folder and put it in your documents/mpide/libraries folder.
+
+ * Put the OpenBCI_32_SD folder into your documents/mpide folder and restart mpide to be able to select the sketch.
+
+ * When you upload the firmware, select the 'OpenBCI 32' from the Tools -> Board -> chipKIT menu,
+ * Then select the serial port of the dongle, then press upload!
+ * We are uploading the sketch over air! There is a chance that the mpide will timeout during the upload process!
+ * If this happens, you will need to unplug the dongle, and re-insert it to stop the upload. 
+ * Then, power cycle the OpenBCI board, as it is best that the Board radio comes on line after the dongle radio. 
+ * Then try again to upload.
+ * This is a known issue, and we can confirm that all boards shipped will take the upload process,
+ * it just might take a couple of times to stick.
  *
- * On A Mac, right click the application mpide, and select 'Show Package Contents' 
- * place the entire OpenBCI folder in the variants folder here:
- * Mpide/Contents/Resources/Java/hardware/pic32/variants
- *
- * On a Windows, place the entire OpenBCI folder in the variants folder here:
- * C:\Program Files\mpide-blah\hardware\pic32\variants
- *
- * Move the files OpenBCI_32 and SD from the OpenBCI_32_Library folder and put it in your documents/mpide/libraries folder.
- * Put the OpenBCI_32_SD into your documents/mpide folder and restart mpide to be able to select the sketch.
- *
- * When you upload the firmware, select the 'OpenBCI 32' from the Tools -> Board -> chipKIT menu, 
- * select the serial port of the dongle, then press upload!
- *
- *
- * SDcard code is based on RawWrite example in SDFat library 
+ * Any SDcard code is based on RawWrite example in SDFat library 
  * ASCII commands are received on the serial port to configure and control
  * Serial protocol uses '+' immediately before and after the command character
- * We call this the 'burger' protocol. the '+' re the buns. Example:
+ * We call this the 'burger' protocol. the '+' are the buns. Example:
  * To begin streaming data, send '+b+'
+ * The addition of the '+'s is handled by the RFduino radios in OpenBCI V3
  * This software is provided as-is with no promise of workability
  * Use at your own risk, wysiwyg.
- * 
+
  */
 
 #include <SD.h>
@@ -103,7 +115,7 @@ void loop() {
       OBCI.updateChannelData(); // get the fresh ADS results
       if(OBCI.useAccel && OBCI.LIS3DH_DataAvailable()){
         OBCI.LIS3DH_updateAxisData();    // fresh axis data goes into the X Y Z 
-        addAccel = true;
+        addAccel = true;    // adds accel data to SD card if you like that kind of thing
       }
       if(SDfileOpen){
         writeDataToSDcard(sampleCounter);  // 
@@ -469,7 +481,7 @@ void printRegisters(){
 
 void startFromScratch(){
    delay(1000);
-  Serial0.print("OpenBCI V3 32bit Board\nSetting ADS1299 Channel Values\n");
+  Serial0.print("OpenBCI V3 32bit Board\tInitializing...\n");
   OBCI.useAccel = true;  // option to add accelerometer dat to stream
   OBCI.useAux = false;    // option to add user data to stream not implimented yet
   OBCI.initialize();  
