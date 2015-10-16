@@ -5,31 +5,17 @@ Repository containing the firmware for the 32bit OpenBCI board.
 
 Note that to USE the OpenBCI system, you will generally use the OpenBCI USB Dongle. The dongle requries that you install the FTDI drivers for your particular operating system: http://www.ftdichip.com/FTDrivers.htm
 
-Before you upload the firmware, you need to place the OpenBCI board variant files inside the mpide program folder:
+Before you can get started with programming or re-programming the OpenBCI 32bit Board, you will need to insall the libraries specific to it. These can be found here https://github.com/OpenBCI/OpenBCI_32bit_Libraries
 
- * This will allow you to find the OpenBCI 32 board in mpide dropdown selection tree!
+Put the OpenBCI_32_Daisy and OBCI_SD folders into your Documents/Arduino folder and restart Arduino to be able to select the sketch.
 
-Place the OpenBCI folder into the mpide application:
+When you upload the firmware, select the 'OpenBCI 32' from the Tools -> Board menu, 
+select the serial port of the dongle in the Tools -> Port menu. On a Mac, it should be something like /dev/cu/OpenBCI-XXXXXX. On a Windows, it will be an enumerated COM port. 
 
-    On A Mac, right click the application mpide, and select 'Show Package Contents' 
-    place the entire OpenBCI folder in the variants folder here:
-    Mpide/Contents/Resources/Java/hardware/pic32/variants
+The next step is to put the OpenBCI 32bit board into Bootloader mode, so that it can receive the code. To do this, press the RST and PROG buttons on the OpenBCI 32bit Board, then hold the PROG button while you release the RST button. If you do this right, the blue LED on the board will blink like crazy. Now you're ready to upload!
 
+We are uploading the sketch over air! There is a chance that the process will fail!
+If you ever unplug the Dongle, you MUST turn on the OpenBCI Board AFTER you plug the Dongle back in. This is to be nice to the radios as it is best that the Board radio comes on line after the dongle radio.
 
-    On a Windows, place the entire OpenBCI folder in the variants folder here:
-    C:\Program Files\mpide-blah\hardware\pic32\variants
+If you have any questions, or need other help, go to the forum http://openbci.com/index.php/forum/
 
-
-Remove the files OpenBCI_32 and SD from the OpenBCI_32_Library folder and put it in your documents/mpide/libraries folder.
-
-Put the OpenBCI_32_SD into your documents/mpide folder and restart mpide to be able to select the sketch.
-
-When you upload the firmware, select the 'OpenBCI 32' from the Tools -> Board -> chipKIT menu, 
-select the serial port of the dongle, 
-then press upload!
-
-We are uploading the sketch over air! There is a chance that the mpide will timeout during the upload process!
-If this happens, you will need to unplug the dongle, and re-insert it to stop the upload.
-Then, power cycle the OpenBCI board, as it is best that the Board radio comes on line after the dongle radio.
-Then try again to upload. This is a known issue, and we can confirm that all boards shipped will take the upload
-process, it just might take a couple of times to stick.
