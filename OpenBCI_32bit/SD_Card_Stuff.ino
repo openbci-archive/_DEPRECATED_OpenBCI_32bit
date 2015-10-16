@@ -32,8 +32,8 @@ uint32_t overruns;      // count the number of overruns
 uint32_t maxWriteTime;  // keep track of longest write time
 uint32_t minWriteTime;  // and shortest write time
 uint32_t t;        // used to measure total file write time
-  
-byte fileTens, fileOnes;  // enumerate succesive files on card and store number in EEPROM 
+
+byte fileTens, fileOnes;  // enumerate succesive files on card and store number in EEPROM
 char currentFileName[] = "OBCI_00.TXT"; // file name will enumerate in hex 00 - FF
 prog_char elapsedTime[] PROGMEM = {"\n%Total time mS:\n"};  // 17
 prog_char minTime[] PROGMEM = {  "%min Write time uS:\n"};  // 20
@@ -44,53 +44,53 @@ prog_char stopStamp[] PROGMEM = {  "%STOP AT\n"};      // used to stamp SD recor
 prog_char startStamp[] PROGMEM = {  "%START AT\n"};    // used to stamp SD record when started by PC
 
 
-void setupSDcard(char limit){
-  
-  if(!cardInit){ 
+boolean setupSDcard(char limit){
+
+  if(!cardInit){
        if(!card.init(SPI_FULL_SPEED, SD_SS)) {
       Serial0.println("initialization failed. Things to check:");
       Serial0.println("* is a card is inserted?");
       //    card.init(SPI_FULL_SPEED, SD_SS);
       }
       else{
-      Serial0.println("Wiring is correct and a card is present."); 
+      Serial0.println("Wiring is correct and a card is present.");
       cardInit = true;
       }
       if (!volume.init(card)) { // Now we will try to open the 'volume'/'partition' - it should be FAT16 or FAT32
       Serial0.println("Could not find FAT16/FAT32 partition. Make sure you've formatted the card");
-      return;
+      return fileIsOpen;
       }
    }
-  
+
   // use limit to determine file size
   switch(limit){
   case 'h':
     BLOCK_COUNT = 50; break;
-  case 'a': 
+  case 'a':
     BLOCK_COUNT = 512; break;
-  case 'A': 
+  case 'A':
     BLOCK_COUNT = BLOCK_5MIN; break;
-  case 'S': 
+  case 'S':
     BLOCK_COUNT = BLOCK_15MIN; break;
-  case 'F': 
+  case 'F':
     BLOCK_COUNT = BLOCK_30MIN; break;
-  case 'G': 
+  case 'G':
     BLOCK_COUNT = BLOCK_1HR; break;
-  case 'H': 
+  case 'H':
     BLOCK_COUNT = BLOCK_2HR; break;
-  case 'J': 
+  case 'J':
     BLOCK_COUNT = BLOCK_4HR; break;
-  case 'K': 
+  case 'K':
     BLOCK_COUNT = BLOCK_12HR; break;
-  case 'L': 
+  case 'L':
     BLOCK_COUNT = BLOCK_24HR; break;
-  default: return; break;
+  default: Serial0.println("invalid BLOCK count"); return fileIsOpen; break;
   }
-  
+
     incrementFileCounter();
-    openvol = root.openRoot(volume); 
+    openvol = root.openRoot(volume);
     openfile.remove(root, currentFileName); // if the file is over-writing, let it!
-    
+
       if (!openfile.createContiguous(root, currentFileName, BLOCK_COUNT*512UL)) {
       Serial0.print("createfdContiguous fail"); cardInit = false;
       }//else{Serial0.print("got contiguous file...");delay(1);}
@@ -111,20 +111,21 @@ void setupSDcard(char limit){
       maxWriteTime = 0;
       minWriteTime = 65000;
       byteCounter = 0;  // counter from 0 - 512
-      blockCounter = 0; // counter from 0 - BLOCK_COUNT;   
-   if(fileIsOpen == true){  // send corresponding file name to controlling program
-     Serial0.print("Corresponding SD file ");Serial0.println(currentFileName);sendEOT();
-   }  
+      blockCounter = 0; // counter from 0 - BLOCK_COUNT;
+     if(fileIsOpen == true){  // send corresponding file name to controlling program
+       Serial0.print("Corresponding SD file ");Serial0.println(currentFileName);sendEOT();
+     }
+     return fileIsOpen;
 }
-      
-void closeSDfile(){
+
+boolean closeSDfile(){
   if(fileIsOpen){
     OBCI.csLow(SD_SS);  // take spi
     card.writeStop();
-    openfile.close();   
+    openfile.close();
     OBCI.csHigh(SD_SS);  // release the spi
     fileIsOpen = false;
-    if(!is_running){ // verbosity. this gets insterted as footer in openFile
+    if(!is_running){ // verbosity. this also gets insterted as footer in openFile
       Serial0.print("Total Elapsed Time: ");Serial0.print(t);Serial0.println("mS"); delay(10);
       Serial0.print("Max write time: "); Serial0.print(maxWriteTime); Serial0.println(" uS"); delay(10);
       Serial0.print("Min write time: ");Serial0.print(minWriteTime); Serial0.println(" uS"); delay(10);
@@ -141,27 +142,51 @@ void closeSDfile(){
     Serial0.println("no open file to close");
   }
   delay(100); // cool down
+  return fileIsOpen;
 }
 
-void writeDataToSDcard(byte sampleNumber){ 
+void writeDataToSDcard(byte sampleNumber){
   boolean addComma = true;
   // convert 8 bit sampleCounter into HEX
-  convertToHex(sampleNumber, 1, addComma);         
+  convertToHex(sampleNumber, 1, addComma);
   // convert 24 bit channelData into HEX
   for (int currentChannel = 0; currentChannel < 8; currentChannel++){
-    convertToHex(OBCI.channelDataInt[currentChannel], 5, addComma);
-    if(currentChannel == 6 && !addAccel) addComma = false;  // format CSV
+    convertToHex(OBCI.boardChannelDataInt[currentChannel], 5, addComma);
+    if(OBCI.daisyPresent == false){
+      if(currentChannel == 6){
+        addComma = false;
+        if(addAuxToSD || addAccelToSD) {addComma = true;}  // format CSV
+      }
+    }
   }
-      
-  if(addAccel == true){  // if we have accelerometer data to log
+  if(OBCI.daisyPresent){
+    for (int currentChannel = 0; currentChannel < 8; currentChannel++){
+      convertToHex(OBCI.daisyChannelDataInt[currentChannel], 5, addComma);
+      if(currentChannel == 6){
+        addComma = false;
+        if(addAuxToSD || addAccelToSD) {addComma = true;}  // format CSV
+      }
+    }
+  }
+
+  if(addAuxToSD == true){
+    // convert auxData into HEX
+    for(int currentChannel = 0; currentChannel <  3; currentChannel++){
+      convertToHex(OBCI.auxData[currentChannel], 3, addComma);
+      if(currentChannel == 1) addComma = false;
+    }
+    addAuxToSD = false;
+  }// end of aux data log
+  else if(addAccelToSD == true){  // if we have accelerometer data to log
     // convert 16 bit accelerometer data into HEX
     for (int currentChannel = 0; currentChannel < 3; currentChannel++){
       convertToHex(OBCI.axisData[currentChannel], 3, addComma);
       if(currentChannel == 1) addComma = false;
     }
-    addAccel = false;  // disallow aux data logging 
+    addAccelToSD = false;  // reset addAccel
   }// end of accelerometer data log
-   // add aux data logging...   
+
+   // add aux data logging...
 }
 
 
@@ -187,7 +212,6 @@ void writeCache(){
       t = millis() - t;
       stopRunning();
       OBCI.disable_accel();
-      useAccelOnly = false;
       writeFooter();
     }
     if(blockCounter == BLOCK_COUNT){
@@ -200,7 +224,7 @@ void writeCache(){
 void incrementFileCounter(){
   fileTens = EEPROM.read(0);
   fileOnes = EEPROM.read(1);
-  // if it's the first time writing to EEPROM, seed the file number to '00'  
+  // if it's the first time writing to EEPROM, seed the file number to '00'
   if(fileTens == 0xFF | fileOnes == 0xFF){
     fileTens = fileOnes = '0';
   }
@@ -208,16 +232,16 @@ void incrementFileCounter(){
   if (fileOnes == ':'){fileOnes = 'A';}
   if (fileOnes > 'F'){
     fileOnes = '0';         // hexify
-    fileTens++; 
-    if(fileTens == ':'){fileTens = 'A';} 
+    fileTens++;
+    if(fileTens == ':'){fileTens = 'A';}
     if(fileTens > 'F'){fileTens = '0';fileOnes = '1';}
   }
   EEPROM.write(0,fileTens);     // store current file number in eeprom
   EEPROM.write(1,fileOnes);
-  currentFileName[5] = fileTens;  
+  currentFileName[5] = fileTens;
   currentFileName[6] = fileOnes;
 //  // send corresponding file name to controlling program
-//  Serial0.print("Corresponding SD file ");Serial0.println(currentFileName); 
+//  Serial0.print("Corresponding SD file ");Serial0.println(currentFileName);
 }
 
 void stampSD(boolean state){
@@ -238,7 +262,7 @@ void stampSD(boolean state){
       if(byteCounter == 512){
         writeCache();
       }
-    }  
+    }
   }
   convertToHex(time, 7, false);
 }
@@ -276,7 +300,7 @@ void writeFooter(){
     for (uint8_t i = 0; i < n; i++) {
       convertToHex(over[i].block, 7, true);
       convertToHex(over[i].micro, 7, false);
-    } 
+    }
   }
   for(int i=byteCounter; i<512; i++){
     pCache[i] = NULL;
@@ -306,7 +330,7 @@ void convertToHex(long rawData, int numNibbles, boolean useComma){
   }else{
     pCache[byteCounter] = '\n';
   }
-  byteCounter++; 
+  byteCounter++;
   if(byteCounter == 512){
     writeCache();
   }
