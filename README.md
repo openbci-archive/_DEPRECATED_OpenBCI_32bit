@@ -7,6 +7,10 @@ Note that to USE the OpenBCI system, you will generally use the OpenBCI USB Dong
 
 Before you can get started with programming or re-programming the OpenBCI 32bit Board, you will need to insall the libraries specific to it. These can be found here https://github.com/OpenBCI/OpenBCI_32bit_Libraries
 
+Download the latest Arduino IDE software from the Arduino site www.arduino.cc
+
+Follow the instructions to download and install the latest chipKIT-core hardware files from the chipKIT-core wiki http://chipkit.net/wiki/index.php?title=ChipKIT_core
+
 Put the OpenBCI_32_Daisy and OBCI_SD folders into your Documents/Arduino folder and restart Arduino to be able to select the sketch.
 
 When you upload the firmware, select the 'OpenBCI 32' from the Tools -> Board menu, 
