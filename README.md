@@ -7,9 +7,13 @@ There is a tutorial for getting started from scratch uploading code to OpenBCI 3
 
 Note that to USE the OpenBCI system, you will generally use the OpenBCI USB Dongle. The dongle requries that you install the FTDI drivers for your particular operating system: http://www.ftdichip.com/FTDrivers.htm
 
-Download the latest Arduino IDE software from the Arduino site www.arduino.cc
+Download Arduino IDE version 1.6.5 software from the Arduino site. Currently, only 1.6.5 works with our software.
 
-Follow the instructions to download and install the latest chipKIT-core hardware files from the chipKIT-core wiki http://chipkit.net/wiki/index.php?title=ChipKIT_core
+    https://www.arduino.cc/en/Main/OldSoftwareReleases#previous
+
+Follow the instructions to download and install the latest chipKIT-core hardware files from the chipKIT-core wiki 
+
+    http://chipkit.net/wiki/index.php?title=ChipKIT_core
 
 Before you can get started with programming or re-programming the OpenBCI 32bit Board, you will need to insall the libraries specific to it. These can be found here https://github.com/OpenBCI/OpenBCI_32bit_Libraries
 Put the OpenBCI_32_Daisy and OBCI_SD folders into your Documents/Arduino folder and restart Arduino to be able to select the sketch.
