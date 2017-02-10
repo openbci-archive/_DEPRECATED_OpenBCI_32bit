@@ -15,7 +15,7 @@ There is a tutorial for getting started from scratch uploading code to OpenBCI 3
 
 Note that to USE the OpenBCI system, you will generally use the OpenBCI USB Dongle. The dongle requries that you install the FTDI drivers for your particular operating system: http://www.ftdichip.com/FTDrivers.htm
 
-Download Arduino IDE version 1.6.5 software from the Arduino site. Currently, only 1.6.5 works with our software.
+Download Arduino IDE version 1.6.12 software from the Arduino site.
 https://www.arduino.cc/en/Main/OldSoftwareReleases#previous
 
 Follow the instructions to download and install the latest chipKIT-core hardware files from the chipKIT-core wiki 
